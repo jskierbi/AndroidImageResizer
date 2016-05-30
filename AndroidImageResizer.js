@@ -17,20 +17,26 @@ var currentImageSize;
 var smallestImageSize;
 
 function askUserForCurrentSize() {
-  rl.question("Enter current image size [xxxhdpi, xxhdpi, xhdpi, hdpi, mdpi, ldpi]: ",
-  function(inputString) {
-    currentImageSize = inputString;
-    askUserForSmallestSize();
-  });
+  console.log("Input images are xxhdpi");
+  currentImageSize = "xxhdpi";
+  askUserForSmallestSize();
+  // rl.question("Enter current image size [xxxhdpi, xxhdpi, xhdpi, hdpi, mdpi, ldpi]: ",
+  // function(inputString) {
+  //   currentImageSize = inputString;
+  //   askUserForSmallestSize();
+  // });
 }
 
 function askUserForSmallestSize() {
-  rl.question("Enter smallest desired image size [xxxhdpi, xxhdpi, xhdpi, hdpi, mdpi, ldpi]: ",
-  function(inputString) {
-    smallestImageSize = inputString;
-    makeDirectories();
-    rl.close();
-  });
+  console.log("Smallest images are hdpi");
+  smallestImageSize = "hdpi"
+  makeDirectories();
+  // rl.question("Enter smallest desired image size [xxxhdpi, xxhdpi, xhdpi, hdpi, mdpi, ldpi]: ",
+  // function(inputString) {
+  //   smallestImageSize = inputString;
+  //   makeDirectories();
+  //   rl.close();
+  // });
 }
 
 function makeDirectories() {
@@ -38,6 +44,7 @@ function makeDirectories() {
   var startIndex = sizeNames.indexOf(currentImageSize);
   var endIndex = sizeNames.indexOf(smallestImageSize);
   for (var i = startIndex; i <= endIndex; i++) {
+    deleteFolderRecursive('drawable-'+sizeNames[i]);
     fs.mkdirSync('drawable-'+sizeNames[i]);
   }
   populateImageFiles();
@@ -70,6 +77,7 @@ function resize(fileIndex, sizeIndex) {
           resize(fileIndex + 1, 0);
         } else {
           console.log("Done.")
+          process.exit()
         }
       });
 }
@@ -85,5 +93,19 @@ function getPercentString(sizeName) {
 function getPercent(sizeName) {
   return multipliers[sizeNames.indexOf(sizeName)] / multipliers[sizeNames.indexOf(currentImageSize)];
 }
+
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
 
 askUserForCurrentSize();
